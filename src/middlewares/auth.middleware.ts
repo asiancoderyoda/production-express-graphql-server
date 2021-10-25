@@ -9,45 +9,33 @@ class AuthUtil {
     private REFRESH_EXPIRES_IN = process.env.JWT_REFRESH_KEY_EXPIRY || '24h'
 
     public async authenticate(userName: string, password: string) {
-            const user = await this.authService.login(userName)
-            if (!user) {
-                return {
-                    errors: [{ field: "email", message: "User not found" }],
-                }
-            }
-            const match =  await argon2.verify(user.password, password);
-            if (!match) {
-                return {
-                    errors: [{ field: "password", message: "Incorrect Password" }],
-                }
-            }
-            const jwtUser = {
-                id: user.id,
-                email: user.email,
-                userName: user.userName,
-            }
-            const token = jwt.sign(jwtUser, process.env.JWT_KEY || 'jwt_secret', { expiresIn: this.AUTH_EXPIRES_IN });
-            const refreshToken = jwt.sign(jwtUser, process.env.JWT_REFRESH_KEY || 'jwt_secret', { expiresIn: this.REFRESH_EXPIRES_IN });
+        const user = await this.authService.login(userName)
+        if (!user) {
             return {
-                user: user,
-                token: token,
-                refreshToken: refreshToken,
-                errors: [],
-            };
+                errors: [{ field: "email", message: "User not found" }],
+            }
+        }
+        const match =  await argon2.verify(user.password, password);
+        if (!match) {
+            return {
+                errors: [{ field: "password", message: "Incorrect Password" }],
+            }
+        }
+        const jwtUser = {
+            id: user.id,
+            email: user.email,
+            userName: user.userName,
+        }
+        const token = jwt.sign(jwtUser, process.env.JWT_KEY || 'jwt_secret', { expiresIn: this.AUTH_EXPIRES_IN });
+        const refreshToken = jwt.sign(jwtUser, process.env.JWT_REFRESH_KEY || 'jwt_secret', { expiresIn: this.REFRESH_EXPIRES_IN });
+        return {
+            user: user,
+            token: token,
+            refreshToken: refreshToken,
+            errors: [],
+        };
     }
-
-    // public async verifyUser(bearerTokenCombi?: string) {
-    //     try {
-    //         const token = bearerTokenCombi ? bearerTokenCombi.split(' ')[1] : null;
-    //         if (!token) {
-    //             return null;
-    //         }
-    //         const user = jwt.verify(token, process.env.JWT_KEY || 'jwt_secret');
-    //         return user;
-    //     } catch (error) {
-    //         return null;
-    //     }
-    // }
+    
     public verifyUser(bearerTokenCombi: string, callback: (user: null | undefined | jwt.JwtPayload) => void) {
         const token = bearerTokenCombi ? bearerTokenCombi.split(' ')[1] : null;
         if (!token) {

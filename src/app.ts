@@ -35,6 +35,12 @@ class App {
             this.apolloServer = new ApolloServer({
                 schema: await buildSchema({
                     resolvers: [IndexResolver, AuthResolver],
+                    authChecker: ({ context: { user } }: { context: { user: AuthorizedUser } }) => {
+                        if (user) {
+                            return true;
+                        }
+                        return false;
+                    },
                     validate: true
                 }),
                 context: ({req, res}): OrmContext => {
