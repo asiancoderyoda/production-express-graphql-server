@@ -6,6 +6,7 @@ import { User } from "src/interfaces/users.interface";
 import argon2 from "argon2";
 import { validateEmail, validatePassword } from "../../src/utils/patterns.utils";
 import AuthUtil from "../middlewares/auth.middleware";
+import LoggerUtils from "src/utils/logger.utils";
 
 @InputType()
 class UserNamePasswordInput {
@@ -57,6 +58,8 @@ class UserResolver {
     public authService: AuthService = new AuthService();
     public authUtil: AuthUtil = new AuthUtil();
 
+    public errLogger = new LoggerUtils().getLogger("error");
+
     @Mutation(() => UserResponse)
     async register(
         @Arg("options", () => UserNamePasswordInput) options: UserNamePasswordInput,
@@ -89,6 +92,7 @@ class UserResolver {
                 user: response,
             };
         } catch (error) {
+            this.errLogger.error("Resolver: auth.resolver register - Error: " + error);
             throw new Error(error);
         }
     }
@@ -121,6 +125,7 @@ class UserResolver {
                 refreshToken: user.refreshToken,
             };
         } catch (error) {
+            this.errLogger.error("Resolver: auth.resolver login - Error: " + error);
             throw new Error(error);
         }
     }
