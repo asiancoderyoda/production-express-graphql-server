@@ -14,12 +14,14 @@ import AuthResolver from "./resolvers/auth.resolver";
 import { OrmContext } from "./interfaces/orm.context.interface";
 import AuthUtil from "./middlewares/auth.middleware";
 import { AuthorizedUser } from "./interfaces/users.interface";
+import LoggerUtils from "./utils/logger.utils";
 
 class App {
     public apolloServer: ApolloServer;
     public app: express.Application;
     public port: string | number;
     public env: string;
+    public errLogger = new LoggerUtils().getLogger("error");
 
     constructor(routes: Routes[]) {
         this.app = express();
@@ -36,9 +38,7 @@ class App {
                 schema: await buildSchema({
                     resolvers: [IndexResolver, AuthResolver],
                     authChecker: ({ context: { user } }: { context: { user: AuthorizedUser } }) => {
-                        if (user) {
-                            return true;
-                        }
+                        if (user) return true;
                         return false;
                     },
                     validate: true
@@ -63,7 +63,7 @@ class App {
             await this.apolloServer.start()
             await this.apolloServer.applyMiddleware({app:this.app})
         } catch (error) {
-            console.log(error)
+            this.errLogger.error("Service: Apollo Server - Error: " + error);
         }
     }
 
@@ -95,11 +95,11 @@ class App {
                     console.log(`✔ App listening on the port ${this.port}🤞`);
                     console.log(`==================================`);
                 } catch (err) {
-                    console.error(err);
+                    this.errLogger.error("Service: App Server - Error: " + err);
                 }
             })  
         } catch (error) {
-            console.log(error)   
+            this.errLogger.error("Service: App Server - Error: " + error);  
         }
     }
 
@@ -111,7 +111,9 @@ class App {
         this.app.use(morgan("dev"));
         this.app.use(cors());
         /*
-        ---- For production use ----
+        ----------------------------- For production use only ---------------------------
+        ---- Uncommenting this in development won't allow you to use graphql sandbox ----
+
         this.app.use(hpp());
         this.app.use(helmet.contentSecurityPolicy());
         this.app.use(helmet.dnsPrefetchControl());

@@ -3,7 +3,6 @@ import { Ctx, Query, Resolver } from "type-graphql";
 
 @Resolver()
 class IndexResolver {
-    // @Authorized()
     @Query(() => String)
     hello(
         @Ctx() {user}: OrmContext
