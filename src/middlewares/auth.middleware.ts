@@ -1,6 +1,6 @@
 import argon2 from "argon2";
 import jwt from "jsonwebtoken"
-import LoggerUtils from "src/utils/logger.utils";
+import LoggerUtils from "../utils/logger.utils";
 import AuthService from '../services/auth.service';
 
 class AuthUtil {
