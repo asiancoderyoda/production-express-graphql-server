@@ -4,10 +4,10 @@ import { OrmContext } from "../interfaces/orm.context.interface";
 import AuthService from "../services/auth.service";
 import { User } from "../interfaces/users.interface";
 import argon2 from "argon2";
-import { validateEmail, validatePassword } from "../utils/patterns.utils";
 import AuthUtil from "../middlewares/auth.middleware";
 import LoggerUtils from "../utils/logger.utils";
 import ResponseUtil from "../utils/response.utils";
+import AuthDto from "../dtos/auth.dto";
 
 @InputType()
 class UserNamePasswordInput {
@@ -62,8 +62,8 @@ class UserResolver {
     public authUtil: AuthUtil = new AuthUtil();
     public responseUtil: ResponseUtil = new ResponseUtil();
     public responseCode = this.responseUtil.ResponseCode
-    public responseMessage = this.responseUtil.getResponseMsg;
     public errLogger = new LoggerUtils().getLogger("error");
+    public dto: AuthDto = new AuthDto();
 
     @Mutation(() => UserResponse)
     async register(
@@ -71,23 +71,9 @@ class UserResolver {
         @Ctx() { orm }: OrmContext
     ): Promise<UserResponse> {
         try {
-            if(options.userName.length < 3 || options.userName.length > 20) {
-                return {
-                    errors: [{ field: "userName", message: "User name must be between 3 and 20 characters" }],
-                    code: this.responseCode.InvalidInput,
-                }
-            }  
-            if(!validateEmail(options.email)) {
-                return {
-                    errors: [{ field: "email", message: "Invalid email" }],
-                    code: this.responseCode.InvalidInput,
-                }
-            }
-            if(!validatePassword(options.password)) {
-                return {
-                    errors: [{ field: "password", message: "Invalid Password. Should contain 8-20 characters, 1 Upper Case, 1 Lower Case, 1 digit, 1 Special Character" }],
-                    code: this.responseCode.InvalidInput,
-                }
+            const fieldErrors = this.dto.registerDto({...options})
+            if (fieldErrors.code !== this.responseCode.Success) {
+                return fieldErrors;
             }
             const hashedPassword = await argon2.hash(options.password);
             const response: User | string = await this.authService.register(options.userName, options.email, hashedPassword);
@@ -113,17 +99,9 @@ class UserResolver {
         @Ctx() { orm, req }: OrmContext
     ): Promise<UserResponse> {
         try {
-            if(!validateEmail(options.email)) {
-                return {
-                    errors: [{ field: "email", message: "Invalid email" }],
-                    code: this.responseCode.InvalidInput,
-                }
-            }
-            if(!validatePassword(options.password)) {
-                return {
-                    errors: [{ field: "password", message: "Invalid Password. Should contain 8-20 characters, 1 Upper Case, 1 Lower Case, 1 digit, 1 Special Character" }],
-                    code: this.responseCode.InvalidInput,
-                }
+            const fieldErrors = this.dto.loginDto({...options})
+            if (fieldErrors.code !== this.responseCode.Success) {
+                return fieldErrors;
             }
             const user = await this.authUtil.authenticate(options.email, options.password);
             if(user.errors.length > 0) {
