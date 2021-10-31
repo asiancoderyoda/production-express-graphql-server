@@ -1,7 +1,7 @@
 import { UserEntity } from "../entities/User";
 import { User } from "../interfaces/users.interface";
 import { getRepository } from "typeorm";
-import LoggerUtils from "src/utils/logger.utils";
+import LoggerUtils from "../utils/logger.utils";
 
 class AuthService {
     public users = UserEntity;
