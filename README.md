@@ -5,4 +5,5 @@ Steps to run this project in development mode:
 
 1. Run `npm i` command
 2. Setup database settings inside `ormconfig.json` file at the root directory
-3. Run `npm run dev` command
+3. Enable "logging": true in `ormconfig.json`,
+4. Run `npm run dev` command
