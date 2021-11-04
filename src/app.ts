@@ -41,7 +41,7 @@ class App {
                         if (user) return true;
                         return false;
                     },
-                    validate: true
+                    validate: true,
                 }),
                 context: ({req, res}): OrmContext => {
                     const authUtil: AuthUtil = new AuthUtil();
