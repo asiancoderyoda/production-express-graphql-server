@@ -86,10 +86,11 @@ class App {
                     npx ts-node ./node_modules/typeorm/cli.js migration:run
     
                     for running auto migrations... on server start
-                    const conn = await createConnection();
+                    const conn = await orm.createConnection();
                     await conn.runMigrations();
                     */
-                    await orm.createConnection();
+                    const conn = await orm.createConnection();
+                    await conn.runMigrations();
                     console.log(`==================================`);
                     console.log(`======= ENV: ${this.env} =========`);
                     console.log(`✔ App listening on the port ${this.port}🤞`);
