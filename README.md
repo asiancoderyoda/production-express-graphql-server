@@ -8,7 +8,7 @@ Steps to run this project in development mode:
 2. Setup database settings inside **ormconfig.json** file at the root directory
 3. Enable `"logging": true` in **ormconfig.json**,
 4. Your **ormconfig.json** should point to the dist folder during development
-```
+```json
 "entities": [
   "dist/entities/**/*.js"
 ],
@@ -36,7 +36,7 @@ To enforce authentication on a field, query or mutation declare a `@Authorized()
 
 Take the example of a query. To enforce Authorization we do this
 
-```
+```ts
 @Authorized()
 @Query(() => String)
 checkUser(
