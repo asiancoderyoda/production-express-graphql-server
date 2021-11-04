@@ -1,7 +1,39 @@
 {
-   "name": "new-typeorm-project",
-   "version": "0.0.1",
-   "description": "Awesome project developed with TypeORM.",
+   "name": "graphql-express-boilerplate",
+   "version": "1.0.0",
+   "description": "Production grade graphql-express boilerplate to quicky spin up a server",
+   "main": "src/server.ts",
+   "bin": "src/server.ts",
+   "author": "Avigyan Bhakta",
+   "license": "MIT",
+   "type": "commonjs",
+   "keywords": [
+      "express graphql boilerplate",
+      "typeorm",
+      "apollo typescript express",
+      "typescript",
+      "nodejs",
+      "express",
+      "postgres",
+      "boilerplate",
+      "orm"
+   ],
+   "scripts": {
+      "build": "tsc",
+      "watch": "tsc -w",
+      "start": "node dist/server.js",
+      "dev": "nodemon dist/server.js",
+      "start2": "ts-node src/server.ts",
+      "dev2": "nodemon --exec ts-node src/server.ts"
+   },
+   "repository": {
+      "type": "git",
+      "url": "git+https://github.com/asiancoderyoda/production-express-graphql-server.git"
+   },
+   "bugs": {
+      "url": "https://github.com/asiancoderyoda/production-express-graphql-server/issues"
+   },
+   "homepage": "https://github.com/asiancoderyoda/production-express-graphql-server#readme",
    "devDependencies": {
       "@types/argon2": "^0.15.0",
       "@types/compression": "^1.7.2",
@@ -39,12 +71,5 @@
       "reflect-metadata": "^0.1.10",
       "type-graphql": "^1.1.1",
       "typeorm": "0.2.37"
-   },
-   "scripts": {
-      "watch": "tsc -w",
-      "start": "node dist/server.js",
-      "start2": "ts-node src/server.ts",
-      "dev": "nodemon --exec ts-node src/server.ts",
-      "dev2": "nodemon dist/server.js"
    }
 }

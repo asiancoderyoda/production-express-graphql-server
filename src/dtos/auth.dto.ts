@@ -22,13 +22,13 @@ class AuthDto {
     public registerDto(args: RegisterInput): FieldErrorResponse {
         if(args.userName.length < 3 || args.userName.length > 20) {
             return {
-                errors: [{ field: "userName", message: "User name must be between 3 and 20 characters" }],
+                errors: [{ field: "userName", message: "User Name must be between 3 and 20 characters" }],
                 code: this.responseCode.InvalidInput,
             }
         }  
         if(!validateEmail(args.email)) {
             return {
-                errors: [{ field: "email", message: "Invalid email" }],
+                errors: [{ field: "email", message: "Invalid Email ID" }],
                 code: this.responseCode.InvalidInput,
             }
         }
@@ -47,7 +47,7 @@ class AuthDto {
     public loginDto(args: LoginInput): FieldErrorResponse {
         if(!validateEmail(args.email)) {
             return {
-                errors: [{ field: "email", message: "Invalid email" }],
+                errors: [{ field: "email", message: "Invalid Email ID" }],
                 code: this.responseCode.InvalidInput,
             }
         }
