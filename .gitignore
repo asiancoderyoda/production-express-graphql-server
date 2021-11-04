@@ -110,3 +110,5 @@ build/
 tmp/
 temp/
 ormconfig.json
+# Package-lock json file
+package-lock.json
