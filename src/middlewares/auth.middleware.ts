@@ -2,14 +2,18 @@ import argon2 from "argon2";
 import jwt from "jsonwebtoken"
 import LoggerUtils from "../utils/logger.utils";
 import AuthService from '../services/auth.service';
+import { Logger } from "log4js";
 
 class AuthUtil {
-    private authService: AuthService = new AuthService();
+    constructor(
+        private readonly authService: AuthService,
+        private readonly errLogger: Logger,
+    ) {
+        this.errLogger = new LoggerUtils().getLogger("error");
+    }
 
     private AUTH_EXPIRES_IN = process.env.JWTKEY_EXPIRY || '1h';
     private REFRESH_EXPIRES_IN = process.env.JWT_REFRESH_KEY_EXPIRY || '24h';
-
-    public errLogger = new LoggerUtils().getLogger("error");
 
     public async authenticate(userName: string, password: string) {
         const user = await this.authService.login(userName)

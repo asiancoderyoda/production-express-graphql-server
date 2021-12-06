@@ -1,12 +1,27 @@
 import { UserEntity } from "../entities/User";
 import { User } from "../interfaces/users.interface";
-import { getRepository } from "typeorm";
+import { getRepository, Repository } from "typeorm";
 import LoggerUtils from "../utils/logger.utils";
+import { Service } from "typedi";
+import { Logger } from "log4js";
 
+@Service()
 class AuthService {
-    public users = UserEntity;
-    private userRepository = getRepository(this.users);
-    public errLogger = new LoggerUtils().getLogger("error");
+    // private userRepository: Repository<UserEntity>
+    // constructor() {
+    //     this.userRepository = getRepository(UserEntity);
+    // }
+    // private errLogger = this.Logger.getLogger("error");
+    // public users = UserEntity;
+    // public errLogger = new LoggerUtils().getLogger("error");
+
+    constructor(
+        private readonly userRepository: Repository<UserEntity>,
+        private readonly errLogger: Logger
+    ) {
+        this.userRepository = getRepository(UserEntity);
+        this.errLogger = new LoggerUtils().getLogger("error");
+    }
 
     public async register(userName: string, email: string, password: string): Promise<User | string> {
         try {

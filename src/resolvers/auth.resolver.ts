@@ -8,6 +8,8 @@ import AuthUtil from "../middlewares/auth.middleware";
 import LoggerUtils from "../utils/logger.utils";
 import ResponseUtil from "../utils/response.utils";
 import AuthDto from "../dtos/auth.dto";
+import { Service } from "typedi";
+import { Logger } from "log4js";
 
 @InputType()
 class UserNamePasswordInput {
@@ -55,15 +57,28 @@ class UserResponse {
   @Field(() => String, { nullable: true })
   refreshToken?: string;
 }
-
+// https://github.com/JayJayDee/TypeGraphQL-TypeORM-Example/blob/master/src/graphql-resolvers/player-resolver.ts
+@Service()
 @Resolver()
 class UserResolver {
-    public authService: AuthService = new AuthService();
-    public authUtil: AuthUtil = new AuthUtil();
-    public responseUtil: ResponseUtil = new ResponseUtil();
+    // public authService: AuthService = new AuthService();
+    // public authUtil: AuthUtil = new AuthUtil();
+    // public responseUtil: ResponseUtil = new ResponseUtil();
+    // public responseCode = this.responseUtil.ResponseCode
+    // public errLogger = new LoggerUtils().getLogger("error");
+    // public dto: AuthDto = new AuthDto();
+
+    constructor(
+        private readonly authService: AuthService,
+        private readonly authUtil: AuthUtil,
+        private readonly errLogger: Logger,
+        private readonly dto: AuthDto,
+        public responseUtil: ResponseUtil
+    ) {
+        this.errLogger = new LoggerUtils().getLogger("error");
+    }
+
     public responseCode = this.responseUtil.ResponseCode
-    public errLogger = new LoggerUtils().getLogger("error");
-    public dto: AuthDto = new AuthDto();
 
     @Mutation(() => UserResponse)
     async register(

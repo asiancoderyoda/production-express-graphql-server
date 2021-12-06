@@ -112,3 +112,5 @@ temp/
 ormconfig.json
 # Package-lock json file
 package-lock.json
+# CLI script
+cli.js
