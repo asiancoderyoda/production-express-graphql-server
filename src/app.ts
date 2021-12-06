@@ -6,8 +6,9 @@ import morgan from "morgan";
 import compression from 'compression';
 import cors from 'cors';
 import bodyParser from 'body-parser';
-// import helmet from "helmet";
+import helmet from "helmet";
 import {buildSchema} from 'type-graphql';
+import { Container } from "typedi";
 import { Routes } from "./interfaces/routes.interface";
 import IndexResolver from "./resolvers/index.resolver";
 import AuthResolver from "./resolvers/auth.resolver";
@@ -15,6 +16,7 @@ import { OrmContext } from "./interfaces/orm.context.interface";
 import AuthUtil from "./middlewares/auth.middleware";
 import { AuthorizedUser } from "./interfaces/users.interface";
 import LoggerUtils from "./utils/logger.utils";
+import { ApolloServerLoaderPlugin } from "type-graphql-dataloader";
 
 class App {
     public apolloServer: ApolloServer;
@@ -41,10 +43,11 @@ class App {
                         if (user) return true;
                         return false;
                     },
+                    container: Container,
                     validate: true,
                 }),
                 context: ({req, res}): OrmContext => {
-                    const authUtil: AuthUtil = new AuthUtil();
+                    const authUtil = Container.get(AuthUtil);
                     let user: AuthorizedUser | null = null;
                     const bearerTokenCombi = req.headers['authorization'] ? req.headers['authorization'] : '';
                     authUtil.verifyUser(bearerTokenCombi, (jwtUser) => {
@@ -58,8 +61,13 @@ class App {
                         }
                     });
                     return {orm: orm, req, res, user: user};
-                }
-            })
+                },
+                plugins: [
+                    ApolloServerLoaderPlugin({
+                        typeormGetConnection: () => orm.getConnection(),
+                    })
+                ],
+            });
             await this.apolloServer.start()
             await this.apolloServer.applyMiddleware({app:this.app})
         } catch (error) {
@@ -113,21 +121,22 @@ class App {
         this.app.use(cors());
         /*
         ----------------------------- For production use only ---------------------------
-        ---- Uncommenting this in development won't allow you to use graphql sandbox ----
-
-        this.app.use(hpp());
-        this.app.use(helmet.contentSecurityPolicy());
-        this.app.use(helmet.dnsPrefetchControl());
-        this.app.use(helmet.expectCt());
-        this.app.use(helmet.frameguard());
-        this.app.use(helmet.hidePoweredBy());
-        this.app.use(helmet.hsts());
-        this.app.use(helmet.ieNoOpen());
-        this.app.use(helmet.noSniff());
-        this.app.use(helmet.permittedCrossDomainPolicies());
-        this.app.use(helmet.referrerPolicy());
-        this.app.use(helmet.xssFilter());
+        ---- Using this in development won't allow you to use graphql sandbox ----
         */
+       if(process.env.NODE_ENV === "production") {
+            // this.app.use(hpp());
+            this.app.use(helmet.contentSecurityPolicy());
+            this.app.use(helmet.dnsPrefetchControl());
+            this.app.use(helmet.expectCt());
+            this.app.use(helmet.frameguard());
+            this.app.use(helmet.hidePoweredBy());
+            this.app.use(helmet.hsts());
+            this.app.use(helmet.ieNoOpen());
+            this.app.use(helmet.noSniff());
+            this.app.use(helmet.permittedCrossDomainPolicies());
+            this.app.use(helmet.referrerPolicy());
+            this.app.use(helmet.xssFilter());   
+       }
         this.app.use(compression());
         this.app.use(express.json({limit: '15mb'}));
         this.app.use(express.urlencoded({limit: '15mb', extended: true}));

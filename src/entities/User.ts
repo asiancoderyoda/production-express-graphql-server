@@ -1,8 +1,10 @@
 import { IsEmail, Length, MinLength } from 'class-validator';
 import { Field, ObjectType } from 'type-graphql';
+import { Service } from 'typedi';
 import { Entity, Column, Unique, CreateDateColumn, UpdateDateColumn, PrimaryGeneratedColumn } from 'typeorm';
 import { User } from '../interfaces/users.interface';
 
+@Service()
 @ObjectType()
 @Entity()
 @Unique(['email'])
