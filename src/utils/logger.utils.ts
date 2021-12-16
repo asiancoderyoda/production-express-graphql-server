@@ -1,5 +1,7 @@
 import * as log4js from 'log4js';
+import { Service } from 'typedi';
 
+@Service()
 class LoggerUtils {
     constructor() {
         log4js.configure({

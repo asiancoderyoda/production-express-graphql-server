@@ -1,6 +1,8 @@
-import { OrmContext } from "../../src/interfaces/orm.context.interface";
+import { OrmContext } from "../interfaces/orm.context.interface";
 import { Ctx, Query, Resolver } from "type-graphql";
+import { Service } from "typedi";
 
+@Service()
 @Resolver()
 class IndexResolver {
     @Query(() => String)

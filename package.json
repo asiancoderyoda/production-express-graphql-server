@@ -72,6 +72,7 @@
       "type-graphql": "^1.1.1",
       "type-graphql-dataloader": "^0.5.0",
       "typedi": "^0.10.0",
-      "typeorm": "0.2.37"
+      "typeorm": "0.2.37",
+      "typeorm-typedi-extensions": "^0.4.1"
    }
 }

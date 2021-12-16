@@ -11,12 +11,13 @@ import {buildSchema} from 'type-graphql';
 import { Container } from "typedi";
 import { Routes } from "./interfaces/routes.interface";
 import IndexResolver from "./resolvers/index.resolver";
-import AuthResolver from "./resolvers/auth.resolver";
+import UserResolver from "./resolvers/auth.resolver";
 import { OrmContext } from "./interfaces/orm.context.interface";
-import AuthUtil from "./middlewares/auth.middleware";
 import { AuthorizedUser } from "./interfaces/users.interface";
 import LoggerUtils from "./utils/logger.utils";
 import { ApolloServerLoaderPlugin } from "type-graphql-dataloader";
+import { useContainer } from "typeorm";
+import AuthService from "./services/auth.service";
 
 class App {
     public apolloServer: ApolloServer;
@@ -30,6 +31,9 @@ class App {
         this.port = process.env.PORT || 8092;
         this.env = process.env.NODE_ENV || "development";
 
+        useContainer(Container);
+        orm.useContainer(Container);
+
         this.initializeMiddlewares();
         this.initializeRoutes(routes);
     }
@@ -38,7 +42,7 @@ class App {
         try {
             this.apolloServer = new ApolloServer({
                 schema: await buildSchema({
-                    resolvers: [IndexResolver, AuthResolver],
+                    resolvers: [IndexResolver, UserResolver],
                     authChecker: ({ context: { user } }: { context: { user: AuthorizedUser } }) => {
                         if (user) return true;
                         return false;
@@ -47,10 +51,10 @@ class App {
                     validate: true,
                 }),
                 context: ({req, res}): OrmContext => {
-                    const authUtil = Container.get(AuthUtil);
+                    const authSerice = new AuthService();
                     let user: AuthorizedUser | null = null;
                     const bearerTokenCombi = req.headers['authorization'] ? req.headers['authorization'] : '';
-                    authUtil.verifyUser(bearerTokenCombi, (jwtUser) => {
+                    authSerice.verifyUser(bearerTokenCombi, (jwtUser) => {
                         if(jwtUser) {
                             const authorizedUser: AuthorizedUser = {
                                 id: jwtUser.id,
