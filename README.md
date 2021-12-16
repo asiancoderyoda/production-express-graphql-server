@@ -13,10 +13,10 @@ Steps to run this project in development mode:
   "dist/entities/**/*.js"
 ],
 "migrations": [
-    "dist/migrations/**/*.ts"
+    "dist/migrations/**/*.js"
 ],
 "subscribers": [
-    "dist/subscribers/**/*.ts"
+    "dist/subscribers/**/*.js"
 ],
 "cli": {
     "entitiesDir": "dist/entities",
