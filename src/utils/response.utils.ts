@@ -1,3 +1,6 @@
+import { Service } from "typedi";
+
+@Service()
 class ResponseUtil {
     public ResponseCode = {
         Success: 0,

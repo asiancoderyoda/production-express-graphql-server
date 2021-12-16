@@ -4,12 +4,12 @@ import { OrmContext } from "../interfaces/orm.context.interface";
 import AuthService from "../services/auth.service";
 import { User } from "../interfaces/users.interface";
 import argon2 from "argon2";
-import AuthUtil from "../middlewares/auth.middleware";
-import LoggerUtils from "../utils/logger.utils";
 import ResponseUtil from "../utils/response.utils";
 import AuthDto from "../dtos/auth.dto";
-import { Service } from "typedi";
 import { Logger } from "log4js";
+import { InjectRepository } from "typeorm-typedi-extensions";
+import LoggerUtils from "../utils/logger.utils";
+import { Service } from "typedi";
 
 @InputType()
 class UserNamePasswordInput {
@@ -58,27 +58,51 @@ class UserResponse {
   refreshToken?: string;
 }
 // https://github.com/JayJayDee/TypeGraphQL-TypeORM-Example/blob/master/src/graphql-resolvers/player-resolver.ts
+
 @Service()
 @Resolver()
 class UserResolver {
-    // public authService: AuthService = new AuthService();
-    // public authUtil: AuthUtil = new AuthUtil();
-    // public responseUtil: ResponseUtil = new ResponseUtil();
-    // public responseCode = this.responseUtil.ResponseCode
-    // public errLogger = new LoggerUtils().getLogger("error");
-    // public dto: AuthDto = new AuthDto();
+    @InjectRepository(AuthService)
+    private readonly authService: AuthService;
 
-    constructor(
-        private readonly authService: AuthService,
-        private readonly authUtil: AuthUtil,
-        private readonly errLogger: Logger,
-        private readonly dto: AuthDto,
-        public responseUtil: ResponseUtil
-    ) {
-        this.errLogger = new LoggerUtils().getLogger("error");
+    private readonly responseCode
+    private readonly errLogger: Logger
+    private readonly dto
+    constructor() {
+        this.responseCode = new ResponseUtil().ResponseCode
+        this.errLogger = new LoggerUtils().getLogger("Error")
+        this.dto = new AuthDto()
     }
 
-    public responseCode = this.responseUtil.ResponseCode
+    @Mutation(() => UserResponse)
+    async login(
+        @Arg("options", () => LoginInput) options: LoginInput,
+        @Ctx() { orm, req }: OrmContext
+    ): Promise<UserResponse> {
+        try {
+            const fieldErrors = this.dto.loginDto({...options})
+            if (fieldErrors.code !== this.responseCode.Success) {
+                return fieldErrors;
+            }
+            const user = await this.authService.authenticate(options.email, options.password);
+            if(user.errors.length > 0) {
+                return {
+                    errors: [...user.errors],
+                    code: this.responseCode.InvalidInput,
+                }
+            }
+            return {
+                user: user.user,
+                accessToken: user.token,
+                refreshToken: user.refreshToken,
+                code: this.responseCode.Success,
+            };
+        } catch (error) {
+            console.log(error)
+            this.errLogger.error("Resolver: auth.resolver login - Error: " + error);
+            throw new Error(error);
+        }
+    }
 
     @Mutation(() => UserResponse)
     async register(
@@ -104,35 +128,6 @@ class UserResolver {
             };
         } catch (error) {
             this.errLogger.error("Resolver: auth.resolver register - Error: " + error);
-            throw new Error(error);
-        }
-    }
-
-    @Mutation(() => UserResponse)
-    async login(
-        @Arg("options", () => LoginInput) options: LoginInput,
-        @Ctx() { orm, req }: OrmContext
-    ): Promise<UserResponse> {
-        try {
-            const fieldErrors = this.dto.loginDto({...options})
-            if (fieldErrors.code !== this.responseCode.Success) {
-                return fieldErrors;
-            }
-            const user = await this.authUtil.authenticate(options.email, options.password);
-            if(user.errors.length > 0) {
-                return {
-                    errors: [...user.errors],
-                    code: this.responseCode.InvalidInput,
-                }
-            }
-            return {
-                user: user.user,
-                accessToken: user.token,
-                refreshToken: user.refreshToken,
-                code: this.responseCode.Success,
-            };
-        } catch (error) {
-            this.errLogger.error("Resolver: auth.resolver login - Error: " + error);
             throw new Error(error);
         }
     }

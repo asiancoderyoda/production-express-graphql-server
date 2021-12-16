@@ -1,3 +1,4 @@
+import { Service } from "typedi";
 import { FieldErrorResponse } from "../interfaces/httpResponse.intenterface";
 import { validateEmail, validatePassword } from "../utils/patterns.utils";
 import ResponseUtil from "../utils/response.utils";
@@ -13,11 +14,12 @@ interface LoginInput {
   password: string;
 }
 
+@Service()
 class AuthDto {
-    
-    public responseUtil: ResponseUtil = new ResponseUtil();
-    public responseCode = this.responseUtil.ResponseCode
-    public responseMessage = this.responseUtil.getResponseMsg;
+    private readonly responseCode
+    constructor() {
+        this.responseCode = new ResponseUtil().ResponseCode
+    }
 
     public registerDto(args: RegisterInput): FieldErrorResponse {
         if(args.userName.length < 3 || args.userName.length > 20) {
